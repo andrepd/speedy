@@ -517,6 +517,16 @@ struct DerivedStructWithGenericDefault< T = u8 > {
 }
 
 #[derive(PartialEq, Debug, Readable, Writable)]
+struct DerivedStructWithGenericAndConst< const N: usize, T > {
+    inner: [T; N]
+}
+
+#[derive(PartialEq, Debug, Readable, Writable)]
+struct DerivedStructWithGenericDefaultAndConst< const N: usize, T = u8 > {
+    inner: [T; N]
+}
+
+#[derive(PartialEq, Debug, Readable, Writable)]
 struct DerivedStructWithDefaultOnEof {
     a: u8,
     #[speedy(default_on_eof)]
@@ -1673,6 +1683,24 @@ symmetric_tests! {
         le = [1, 0],
         be = [0, 1],
         minimum_bytes = 2
+    }
+    derived_struct_with_generic_and_const for DerivedStructWithGenericAndConst<4, i32> {
+        in = DerivedStructWithGenericAndConst { inner: [1_i32, 2_i32, 3_i32, 4_i32] },
+        le = [1, 0, 0, 0, 2, 0, 0, 0, 3, 0, 0, 0, 4, 0, 0, 0],
+        be = [0, 0, 0, 1, 0, 0, 0, 2, 0, 0, 0, 3, 0, 0, 0, 4],
+        minimum_bytes = 16
+    }
+    derived_struct_with_generic_default_and_const for DerivedStructWithGenericDefaultAndConst<4> {
+        in = DerivedStructWithGenericDefaultAndConst { inner: [0x0a_u8, 0x0b_u8, 0x0c_u8, 0x0d_u8] },
+        le = [0x0a, 0x0b, 0x0c, 0x0d],
+        be = [0x0a, 0x0b, 0x0c, 0x0d],
+        minimum_bytes = 4
+    }
+    derived_struct_with_generic_default_and_const_provided for DerivedStructWithGenericDefaultAndConst<2, u16> {
+        in = DerivedStructWithGenericDefaultAndConst { inner: [0x0a0b_u16, 0x0c0d_u16] },
+        le = [0x0b, 0x0a, 0x0d, 0x0c],
+        be = [0x0a, 0x0b, 0x0c, 0x0d],
+        minimum_bytes = 4
     }
     derived_recursive_struct_empty for DerivedRecursiveStruct {
         in = DerivedRecursiveStruct { inner: Vec::new() },
